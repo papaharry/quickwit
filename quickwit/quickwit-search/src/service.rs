@@ -465,8 +465,17 @@ impl SearcherContext {
             searcher_config.max_num_concurrent_split_searches,
             searcher_config.warmup_memory_budget,
         );
-        let storage_long_term_cache =
-            Arc::new(QuickwitCache::new(&searcher_config.fast_field_cache));
+        let storage_long_term_cache = if searcher_config.term_dict_cache.capacity().as_u64() > 0
+            || searcher_config.posting_list_cache.capacity().as_u64() > 0
+        {
+            Arc::new(QuickwitCache::with_term_and_posting_caches(
+                &searcher_config.fast_field_cache,
+                &searcher_config.term_dict_cache,
+                &searcher_config.posting_list_cache,
+            ))
+        } else {
+            Arc::new(QuickwitCache::new(&searcher_config.fast_field_cache))
+        };
         let leaf_search_cache = LeafSearchCache::new(&searcher_config.partial_request_cache);
         let predicate_cache = PredicateCacheImpl::new(&searcher_config.predicate_cache);
         let list_fields_cache = ListFieldsCache::new(&searcher_config.partial_request_cache);

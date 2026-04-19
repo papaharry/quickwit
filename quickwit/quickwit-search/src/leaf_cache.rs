@@ -134,16 +134,27 @@ impl LeafSearchCache {
                 LeafSearchResponse::decode(&*encoded_result).ok()
             }
             LeafSearchCache::Hybrid { cache, metrics } => {
+                let memory_size = cache.memory().usage();
                 let entry = cache.get(&key).await;
                 match entry {
                     Ok(Some(entry)) => {
                         metrics.hits_num_items.inc();
                         let bytes = &entry.value().0;
                         metrics.hits_num_bytes.inc_by(bytes.len() as u64);
+                        tracing::debug!(
+                            split_id = %key.split_id,
+                            memory_usage = memory_size,
+                            "hybrid cache HIT"
+                        );
                         LeafSearchResponse::decode(bytes.as_slice()).ok()
                     }
                     Ok(None) => {
                         metrics.misses_num_items.inc();
+                        tracing::debug!(
+                            split_id = %key.split_id,
+                            memory_usage = memory_size,
+                            "hybrid cache MISS"
+                        );
                         None
                     }
                     Err(err) => {

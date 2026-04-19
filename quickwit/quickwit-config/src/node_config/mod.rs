@@ -283,6 +283,15 @@ pub struct SearcherConfig {
                                 {ByteSize::mb(256).as_u64()}>")]
     pub predicate_cache: CacheConfig,
 
+    /// Cache for term dictionaries (.term files). Disabled (0) by default.
+    #[serde(alias = "term_dict_cache_capacity")]
+    #[serde(deserialize_with = "CacheConfig::deserialize_with_default::<_, 0>")]
+    pub term_dict_cache: CacheConfig,
+    /// Cache for posting lists (.idx files). Disabled (0) by default.
+    #[serde(alias = "posting_list_cache_capacity")]
+    #[serde(deserialize_with = "CacheConfig::deserialize_with_default::<_, 0>")]
+    pub posting_list_cache: CacheConfig,
+
     pub max_num_concurrent_split_searches: usize,
     pub max_splits_per_search: Option<usize>,
     // Deprecated: stream search requests are no longer supported.
@@ -525,6 +534,8 @@ impl Default for SearcherConfig {
             split_footer_cache: CacheConfig::default_with_capacity(ByteSize::mb(500)),
             partial_request_cache: CacheConfig::default_with_capacity(ByteSize::mb(64)),
             predicate_cache: CacheConfig::default_with_capacity(ByteSize::mb(256)),
+            term_dict_cache: CacheConfig::default_with_capacity(ByteSize(0)),
+            posting_list_cache: CacheConfig::default_with_capacity(ByteSize(0)),
             max_num_concurrent_split_searches: 100,
             max_splits_per_search: None,
             _max_num_concurrent_split_streams: None,

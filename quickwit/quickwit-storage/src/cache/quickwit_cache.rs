@@ -26,7 +26,9 @@ use crate::metrics::CacheMetrics;
 const FULL_SLICE: Range<usize> = 0..usize::MAX;
 
 /// Quickwit storage cache with a size limit.
-/// It is used currently by to cache only fast fields data.
+/// Routes cached data by file extension to separate caches.
+/// Currently supports `.fast` (fast fields), `.term` (term dictionaries),
+/// and `.idx` (posting lists).
 pub struct QuickwitCache {
     router: Vec<(&'static str, Arc<dyn StorageCache>)>,
 }
@@ -38,7 +40,8 @@ impl From<Vec<(&'static str, Arc<dyn StorageCache>)>> for QuickwitCache {
 }
 
 impl QuickwitCache {
-    /// Creates a [`QuickwitCache`] with a cache on fast fields.
+    /// Creates a [`QuickwitCache`] with a cache on fast fields only
+    /// (backward-compatible).
     pub fn new(cache_config: &CacheConfig) -> Self {
         let mut quickwit_cache = QuickwitCache::empty();
         let fast_field_cache_counters: &'static CacheMetrics =
@@ -50,6 +53,40 @@ impl QuickwitCache {
                 fast_field_cache_counters,
             )),
         );
+        quickwit_cache
+    }
+
+    /// Creates a [`QuickwitCache`] with caches for fast fields, term
+    /// dictionaries, and posting lists.
+    pub fn with_term_and_posting_caches(
+        fast_field_config: &CacheConfig,
+        term_dict_config: &CacheConfig,
+        posting_list_config: &CacheConfig,
+    ) -> Self {
+        let mut quickwit_cache = QuickwitCache::empty();
+
+        quickwit_cache.add_route(
+            ".fast",
+            Arc::new(SimpleCache::from_config(
+                fast_field_config,
+                &crate::STORAGE_METRICS.fast_field_cache,
+            )),
+        );
+        quickwit_cache.add_route(
+            ".term",
+            Arc::new(SimpleCache::from_config(
+                term_dict_config,
+                &crate::STORAGE_METRICS.term_dict_cache,
+            )),
+        );
+        quickwit_cache.add_route(
+            ".idx",
+            Arc::new(SimpleCache::from_config(
+                posting_list_config,
+                &crate::STORAGE_METRICS.posting_list_cache,
+            )),
+        );
+
         quickwit_cache
     }
 

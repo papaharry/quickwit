@@ -8161,6 +8161,7 @@ dependencies = [
  "bytes",
  "bytesize",
  "fnv",
+ "foyer",
  "futures",
  "http 1.4.0",
  "http-body-util",
