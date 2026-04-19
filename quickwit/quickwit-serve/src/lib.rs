@@ -634,7 +634,7 @@ pub async fn serve_quickwit(
         };
 
     // Initialize Lambda invoker if enabled and searcher service is running
-    let searcher_context = if node_config.is_service_enabled(QuickwitService::Searcher) {
+    let mut searcher_context = if node_config.is_service_enabled(QuickwitService::Searcher) {
         if let Some(lambda_config) = &node_config.searcher_config.lambda {
             #[cfg(feature = "lambda")]
             {
@@ -642,11 +642,11 @@ pub async fn serve_quickwit(
                 warn!("offloading to lambda is EXPERIMENTAL. Use at your own risk");
                 let invoker =
                     quickwit_lambda_client::try_get_or_deploy_invoker(lambda_config).await?;
-                Arc::new(SearcherContext::new(
+                SearcherContext::new(
                     node_config.searcher_config.clone(),
                     split_cache_opt,
                     Some(invoker),
-                ))
+                )
             }
             #[cfg(not(feature = "lambda"))]
             {
@@ -654,17 +654,31 @@ pub async fn serve_quickwit(
                 bail!("lambda support is statically disabled, but enabled in configuration");
             }
         } else {
-            Arc::new(SearcherContext::new_without_invoker(
+            SearcherContext::new_without_invoker(
                 node_config.searcher_config.clone(),
                 split_cache_opt,
-            ))
+            )
         }
     } else {
-        Arc::new(SearcherContext::new_without_invoker(
+        SearcherContext::new_without_invoker(
             node_config.searcher_config.clone(),
             split_cache_opt,
-        ))
+        )
     };
+
+    // Enable hybrid disk cache for the partial request cache if configured
+    if node_config.searcher_config.partial_request_disk_cache_enabled {
+        let disk_cache_path = node_config
+            .data_dir_path
+            .join("partial-request-cache");
+        let disk_cache_capacity =
+            node_config.searcher_config.partial_request_disk_cache_capacity;
+        searcher_context
+            .enable_hybrid_leaf_search_cache(&disk_cache_path, disk_cache_capacity)
+            .await?;
+    }
+
+    let searcher_context = Arc::new(searcher_context);
 
     let (search_job_placer, search_service) = setup_searcher(
         &node_config,

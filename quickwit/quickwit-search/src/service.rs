@@ -492,6 +492,26 @@ impl SearcherContext {
         }
     }
 
+    /// Upgrades the partial request cache to a hybrid memory + disk cache.
+    ///
+    /// Call this after construction if the searcher config specifies a disk cache path.
+    /// This is separate from `new()` to keep construction synchronous for backward
+    /// compatibility (many call sites, including tests, create SearcherContext synchronously).
+    pub async fn enable_hybrid_leaf_search_cache(
+        &mut self,
+        disk_cache_path: &std::path::Path,
+        disk_cache_capacity: bytesize::ByteSize,
+    ) -> anyhow::Result<()> {
+        let hybrid_cache = LeafSearchCache::new_hybrid(
+            &self.searcher_config.partial_request_cache,
+            disk_cache_path,
+            disk_cache_capacity,
+        )
+        .await?;
+        self.leaf_search_cache = hybrid_cache;
+        Ok(())
+    }
+
     /// Returns the shared instance to track the aggregation memory usage.
     pub fn get_aggregation_limits(&self) -> AggregationLimitsGuard {
         self.aggregation_limit.clone()

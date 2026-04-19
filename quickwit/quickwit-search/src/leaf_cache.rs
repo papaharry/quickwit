@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use std::ops::{Bound, RangeBounds};
+use std::path::Path;
 
+use bytesize::ByteSize;
 use prost::Message;
 use quickwit_config::CacheConfig;
 use quickwit_proto::search::{
@@ -21,12 +23,10 @@ use quickwit_proto::search::{
 };
 use quickwit_proto::types::SplitId;
 use quickwit_storage::{MemorySizedCache, OwnedBytes};
+use serde::{Deserialize, Serialize};
 use tantivy::index::SegmentId;
-
-/// A cache to memoize `leaf_search_single_split` results.
-pub struct LeafSearchCache {
-    content: MemorySizedCache<CacheKey>,
-}
+use foyer::DeviceBuilder as _;
+use tracing::{info, warn};
 
 // TODO we could be smarter about search_after. If we have a cached request with a search_after
 // (possibly equal to None) A, and a corresponding response with the 1st element having the value
@@ -43,26 +43,107 @@ pub struct LeafSearchCache {
 // truncate to X while merging, and get free results from cache for at least the next k subsequent
 // queries which vary only by search_after.
 
+/// A cache to memoize `leaf_search_single_split` results.
+///
+/// Supports two modes:
+/// - **MemoryOnly**: In-memory LRU cache (existing behavior).
+/// - **Hybrid**: foyer-based memory + disk cache. Evicted entries spill to local NVMe
+///   instead of being lost, so the next access reads from disk (~0.1ms) instead of S3
+///   (~50-200ms).
+pub enum LeafSearchCache {
+    MemoryOnly {
+        content: MemorySizedCache<CacheKey>,
+    },
+    Hybrid {
+        cache: foyer::HybridCache<CacheKey, CachedValue>,
+    },
+}
+
+/// Serializable wrapper around encoded protobuf bytes for the foyer disk cache.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct CachedValue(Vec<u8>);
+
 impl LeafSearchCache {
+    /// Create a memory-only cache (backward-compatible, no disk tier).
     pub fn new(config: &CacheConfig) -> LeafSearchCache {
-        LeafSearchCache {
+        LeafSearchCache::MemoryOnly {
             content: MemorySizedCache::from_config(
                 config,
                 &quickwit_storage::STORAGE_METRICS.partial_request_cache,
             ),
         }
     }
-    pub fn get(
+
+    /// Create a hybrid cache with memory + disk tiers.
+    ///
+    /// The memory tier uses the capacity from `config`. The disk tier uses the
+    /// provided path and capacity. When entries are evicted from memory, they
+    /// spill to the disk tier.
+    pub async fn new_hybrid(
+        config: &CacheConfig,
+        disk_cache_path: &Path,
+        disk_cache_capacity: ByteSize,
+    ) -> anyhow::Result<LeafSearchCache> {
+        // ensure the directory exists
+        tokio::fs::create_dir_all(disk_cache_path).await?;
+
+        let memory_capacity = config.capacity().as_u64() as usize;
+        let disk_capacity = disk_cache_capacity.as_u64() as usize;
+
+        info!(
+            memory_capacity_mb = memory_capacity / 1024 / 1024,
+            disk_capacity_mb = disk_capacity / 1024 / 1024,
+            disk_path = %disk_cache_path.display(),
+            "building hybrid leaf search cache"
+        );
+
+        let device = foyer::FsDeviceBuilder::new(disk_cache_path)
+            .with_capacity(disk_capacity)
+            .build()?;
+        let engine_config = foyer::BlockEngineConfig::new(device);
+
+        let hybrid_cache: foyer::HybridCache<CacheKey, CachedValue> =
+            foyer::HybridCacheBuilder::new()
+                .memory(memory_capacity)
+                .storage()
+                .with_engine_config(engine_config)
+                .build()
+                .await?;
+
+        Ok(LeafSearchCache::Hybrid {
+            cache: hybrid_cache,
+        })
+    }
+
+    pub async fn get(
         &self,
         split_info: SplitIdAndFooterOffsets,
         search_request: SearchRequest,
     ) -> Option<LeafSearchResponse> {
         let key = CacheKey::from_split_meta_and_request(split_info, search_request);
-        let encoded_result = self.content.get(&key)?;
-        // this should never fail
-        LeafSearchResponse::decode(&*encoded_result).ok()
+        match self {
+            LeafSearchCache::MemoryOnly { content } => {
+                let encoded_result = content.get(&key)?;
+                LeafSearchResponse::decode(&*encoded_result).ok()
+            }
+            LeafSearchCache::Hybrid { cache } => {
+                let entry = cache.get(&key).await;
+                match entry {
+                    Ok(Some(entry)) => {
+                        LeafSearchResponse::decode(entry.value().0.as_slice()).ok()
+                    }
+                    Ok(None) => None,
+                    Err(err) => {
+                        warn!(error = %err, "hybrid cache get failed, treating as miss");
+                        None
+                    }
+                }
+            }
+        }
     }
 
+    /// Insert a result into the cache. This is synchronous — foyer's `insert()` writes
+    /// to the memory tier immediately and spills to disk asynchronously in the background.
     pub fn put(
         &self,
         split_info: SplitIdAndFooterOffsets,
@@ -71,12 +152,21 @@ impl LeafSearchCache {
     ) {
         let key = CacheKey::from_split_meta_and_request(split_info, search_request);
         let encoded_result = result.encode_to_vec();
-        self.content.put(key, OwnedBytes::new(encoded_result));
+        match self {
+            LeafSearchCache::MemoryOnly { content } => {
+                content.put(key, OwnedBytes::new(encoded_result));
+            }
+            LeafSearchCache::Hybrid { cache } => {
+                cache.insert(key, CachedValue(encoded_result));
+            }
+        }
     }
 }
 
 /// A key inside a [`LeafSearchCache`].
-#[derive(Debug, Hash, Clone, PartialEq, Eq)]
+///
+/// `Serialize`/`Deserialize` are needed for the foyer disk cache (via the `Code` trait).
+#[derive(Debug, Hash, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct CacheKey {
     /// The split this entry refers to
     split_id: SplitId,
@@ -111,7 +201,7 @@ impl CacheKey {
 }
 
 /// A (half-open) range bounded inclusively below and exclusively above [start..end).
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 struct HalfOpenRange {
     start: i64,
     end: Option<i64>,
@@ -243,8 +333,8 @@ mod tests {
 
     use super::LeafSearchCache;
 
-    #[test]
-    fn test_leaf_search_cache_no_timestamp() {
+    #[tokio::test]
+    async fn test_leaf_search_cache_no_timestamp() {
         let cache = LeafSearchCache::new(&ByteSize::mb(64).into());
 
         let split_1 = SplitIdAndFooterOffsets {
@@ -301,16 +391,20 @@ mod tests {
             resource_stats: None,
         };
 
-        assert!(cache.get(split_1.clone(), query_1.clone()).is_none());
+        assert!(cache.get(split_1.clone(), query_1.clone()).await.is_none());
 
-        cache.put(split_1.clone(), query_1.clone(), result.clone());
-        assert_eq!(cache.get(split_1.clone(), query_1.clone()).unwrap(), result);
-        assert!(cache.get(split_2, query_1).is_none());
-        assert!(cache.get(split_1, query_2).is_none());
+        cache
+            .put(split_1.clone(), query_1.clone(), result.clone());
+        assert_eq!(
+            cache.get(split_1.clone(), query_1.clone()).await.unwrap(),
+            result
+        );
+        assert!(cache.get(split_2, query_1).await.is_none());
+        assert!(cache.get(split_1, query_2).await.is_none());
     }
 
-    #[test]
-    fn test_leaf_search_cache_timestamp() {
+    #[tokio::test]
+    async fn test_leaf_search_cache_timestamp() {
         let cache = LeafSearchCache::new(&ByteSize::mb(64).into());
 
         let split_1 = SplitIdAndFooterOffsets {
@@ -393,28 +487,36 @@ mod tests {
         };
 
         // for split_1, 1 and 1bis cover different timestamp ranges
-        cache.put(split_1.clone(), query_1.clone(), result.clone());
-        assert!(cache.get(split_1.clone(), query_1.clone()).is_some());
-        assert!(cache.get(split_1.clone(), query_1bis.clone()).is_none());
+        cache
+            .put(split_1.clone(), query_1.clone(), result.clone());
+        assert!(cache.get(split_1.clone(), query_1.clone()).await.is_some());
+        assert!(cache
+            .get(split_1.clone(), query_1bis.clone())
+            .await
+            .is_none());
 
         // for split_2, both 1 and 1bis cover everything, so it should cache-hit
-        cache.put(split_2.clone(), query_1.clone(), result.clone());
-        assert!(cache.get(split_2.clone(), query_1).is_some());
-        assert!(cache.get(split_2.clone(), query_1bis).is_some());
+        cache
+            .put(split_2.clone(), query_1.clone(), result.clone());
+        assert!(cache.get(split_2.clone(), query_1).await.is_some());
+        assert!(cache.get(split_2.clone(), query_1bis).await.is_some());
 
         // for split_1, both 1 and 1bis cover everything, so it should cache-hit
-        cache.put(split_1.clone(), query_2.clone(), result.clone());
-        assert!(cache.get(split_1.clone(), query_2.clone()).is_some());
-        assert!(cache.get(split_1, query_2bis.clone()).is_some());
+        cache
+            .put(split_1.clone(), query_2.clone(), result.clone());
+        assert!(cache.get(split_1.clone(), query_2.clone()).await.is_some());
+        assert!(cache.get(split_1, query_2bis.clone()).await.is_some());
 
         // for split_2, 2 covers everything, but 2bis cover only a subrange
-        cache.put(split_2.clone(), query_2.clone(), result.clone());
-        assert!(cache.get(split_2.clone(), query_2.clone()).is_some());
-        assert!(cache.get(split_2, query_2bis.clone()).is_none());
+        cache
+            .put(split_2.clone(), query_2.clone(), result.clone());
+        assert!(cache.get(split_2.clone(), query_2.clone()).await.is_some());
+        assert!(cache.get(split_2, query_2bis.clone()).await.is_none());
 
         // same for split_3, but we try caching the bounded request and query for the unbounded one
-        cache.put(split_3.clone(), query_2bis.clone(), result);
-        assert!(cache.get(split_3.clone(), query_2).is_none());
-        assert!(cache.get(split_3, query_2bis).is_some());
+        cache
+            .put(split_3.clone(), query_2bis.clone(), result);
+        assert!(cache.get(split_3.clone(), query_2).await.is_none());
+        assert!(cache.get(split_3, query_2bis).await.is_some());
     }
 }

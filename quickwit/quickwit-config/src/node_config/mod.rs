@@ -302,6 +302,17 @@ pub struct SearcherConfig {
     pub storage_timeout_policy: Option<StorageTimeoutPolicy>,
     pub warmup_memory_budget: ByteSize,
     pub warmup_single_split_initial_allocation: ByteSize,
+    /// Enable the disk tier for the partial request cache.
+    /// When enabled, evicted entries from the in-memory partial request cache
+    /// spill to `{data_dir}/partial-request-cache/` (NVMe recommended) instead
+    /// of being lost. Disabled by default.
+    #[serde(default)]
+    pub partial_request_disk_cache_enabled: bool,
+    /// Disk cache capacity for the partial request cache (default: 1 GB).
+    /// Ignored if partial_request_disk_cache_enabled is false.
+    #[serde(default = "SearcherConfig::default_partial_request_disk_cache_capacity")]
+    pub partial_request_disk_cache_capacity: ByteSize,
+
     /// Lambda configuration for serverless leaf search execution.
     /// If set, enables Lambda execution for leaf search.
     ///
@@ -525,12 +536,18 @@ impl Default for SearcherConfig {
             storage_timeout_policy: None,
             warmup_memory_budget: ByteSize::gb(100),
             warmup_single_split_initial_allocation: ByteSize::mb(300),
+            partial_request_disk_cache_enabled: false,
+            partial_request_disk_cache_capacity: Self::default_partial_request_disk_cache_capacity(),
             lambda: None,
         }
     }
 }
 
 impl SearcherConfig {
+    fn default_partial_request_disk_cache_capacity() -> ByteSize {
+        ByteSize::gb(1)
+    }
+
     /// The timeout applied at the gRPC layer for search requests
     pub fn request_timeout(&self) -> Duration {
         Duration::from_secs(self.request_timeout_secs.get())

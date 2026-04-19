@@ -511,6 +511,7 @@ async fn leaf_search_single_split(
         .searcher_context
         .leaf_search_cache
         .get(split.clone(), search_request.clone())
+        .await
     {
         leaf_search_state_guard.set_state(SplitSearchState::CacheHit);
         return Ok(Some(cached_answer));
@@ -1639,7 +1640,8 @@ pub async fn single_doc_mapping_leaf_search(
             split_with_req,
             split_outcome_counters.clone(),
             &mut incremental_merge_collector,
-        )?;
+        )
+        .await?;
     let incremental_merge_collector_arc: Arc<Mutex<IncrementalCollector>> =
         Arc::new(Mutex::new(incremental_merge_collector));
 
@@ -1773,7 +1775,7 @@ async fn run_local_search_tasks(
 
 /// We identify the splits that are in the cache and append them to the incremental merge collector.
 /// The (split, request) that are yet to be processed are returned.
-fn process_partial_result_cache(
+async fn process_partial_result_cache(
     leaf_search_cache: &LeafSearchCache,
     split_with_req: Vec<(SplitIdAndFooterOffsets, SearchRequest)>,
     split_outcome_counters: Arc<SplitSearchOutcomeCounters>,
@@ -1785,6 +1787,7 @@ fn process_partial_result_cache(
         if let Some(cached_response) = leaf_search_cache
             // TODO remove the clone here.
             .get(split.clone(), search_request.clone())
+            .await
         {
             let mut split_search_guard = SplitSearchStateGuard::new(split_outcome_counters.clone());
             split_search_guard.set_state(SplitSearchState::CacheHit);
