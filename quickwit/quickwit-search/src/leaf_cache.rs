@@ -535,4 +535,74 @@ mod tests {
         assert!(cache.get(split_3.clone(), query_2).await.is_none());
         assert!(cache.get(split_3, query_2bis).await.is_some());
     }
+
+    #[tokio::test]
+    async fn test_hybrid_cache_basic() {
+        let tmp_dir = std::env::temp_dir().join(format!(
+            "quickwit-test-hybrid-cache-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        let cache = LeafSearchCache::new_hybrid(
+            &ByteSize::mb(64).into(),
+            &tmp_dir,
+            ByteSize::mb(100),
+        )
+        .await
+        .expect("failed to create hybrid cache");
+
+        let split = SplitIdAndFooterOffsets {
+            split_id: "split_hybrid".to_string(),
+            split_footer_start: 0,
+            split_footer_end: 100,
+            timestamp_start: None,
+            timestamp_end: None,
+            num_docs: 0,
+        };
+
+        let query = SearchRequest {
+            index_id_patterns: vec!["test-idx".to_string()],
+            query_ast: "hybrid_test".to_string(),
+            start_timestamp: None,
+            end_timestamp: None,
+            max_hits: 10,
+            start_offset: 0,
+            ..Default::default()
+        };
+
+        let result = LeafSearchResponse {
+            failed_splits: Vec::new(),
+            intermediate_aggregation_result: None,
+            num_attempted_splits: 1,
+            num_successful_splits: 1,
+            num_hits: 42,
+            partial_hits: vec![PartialHit {
+                doc_id: 1,
+                segment_ord: 0,
+                sort_value: Some(SortValue::U64(0u64).into()),
+                sort_value2: None,
+                split_id: "split_hybrid".to_string(),
+            }],
+            resource_stats: None,
+        };
+
+        // miss before put
+        assert!(
+            cache.get(split.clone(), query.clone()).await.is_none(),
+            "expected miss before put"
+        );
+
+        // put
+        cache.put(split.clone(), query.clone(), result.clone());
+
+        // hit after put
+        let cached = cache
+            .get(split.clone(), query.clone())
+            .await;
+        assert!(
+            cached.is_some(),
+            "expected hit after put, got None"
+        );
+        assert_eq!(cached.unwrap().num_hits, 42);
+    }
 }
