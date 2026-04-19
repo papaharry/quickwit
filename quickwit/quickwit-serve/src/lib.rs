@@ -666,15 +666,15 @@ pub async fn serve_quickwit(
         )
     };
 
-    // Enable hybrid disk cache for the partial request cache if configured
+    // Enable hybrid disk cache (foyer) for all search caches if configured
     if node_config.searcher_config.partial_request_disk_cache_enabled {
         let disk_cache_path = node_config
             .data_dir_path
-            .join("partial-request-cache");
+            .join("search-cache");
         let disk_cache_capacity =
             node_config.searcher_config.partial_request_disk_cache_capacity;
         searcher_context
-            .enable_hybrid_leaf_search_cache(&disk_cache_path, disk_cache_capacity)
+            .enable_hybrid_caches(&disk_cache_path, disk_cache_capacity)
             .await?;
     }
 

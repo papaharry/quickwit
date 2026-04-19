@@ -19,8 +19,11 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use quickwit_config::CacheConfig;
 
+use bytesize::ByteSize;
+
 use crate::OwnedBytes;
 use crate::cache::{MemorySizedCache, StorageCache};
+use crate::cache::foyer_cache::FoyerStorageCache;
 use crate::metrics::CacheMetrics;
 
 const FULL_SLICE: Range<usize> = 0..usize::MAX;
@@ -88,6 +91,78 @@ impl QuickwitCache {
         );
 
         quickwit_cache
+    }
+
+    /// Creates a [`QuickwitCache`] with foyer hybrid caches for all routes.
+    ///
+    /// Each route gets its own memory + disk cache. The memory tier uses the
+    /// capacity from the corresponding `CacheConfig`. The disk tier uses a
+    /// subdirectory under `disk_base_path`.
+    pub async fn with_foyer(
+        fast_field_config: &CacheConfig,
+        term_dict_config: &CacheConfig,
+        posting_list_config: &CacheConfig,
+        disk_base_path: &std::path::Path,
+        disk_capacity: ByteSize,
+    ) -> anyhow::Result<Self> {
+        let mut quickwit_cache = QuickwitCache::empty();
+
+        // split disk capacity proportionally by memory config ratios
+        let total_mem = fast_field_config.capacity().as_u64()
+            + term_dict_config.capacity().as_u64()
+            + posting_list_config.capacity().as_u64();
+
+        // helper: compute proportional disk allocation
+        let disk_for = |config: &CacheConfig| -> usize {
+            let mem = config.capacity().as_u64();
+            if total_mem > 0 && mem > 0 {
+                (disk_capacity.as_u64() as f64 * mem as f64 / total_mem as f64) as usize
+            } else {
+                0
+            }
+        };
+
+        // fast fields — always enabled
+        let fast_disk = disk_for(fast_field_config);
+        let fast_dir = disk_base_path.join("fast");
+        let fast_cache = FoyerStorageCache::build(
+            fast_field_config.capacity().as_u64() as usize,
+            &fast_dir,
+            fast_disk,
+            crate::STORAGE_METRICS.fast_field_cache.cache_metrics.clone(),
+        )
+        .await?;
+        quickwit_cache.add_route(".fast", Arc::new(fast_cache));
+
+        // term dict — only if configured with non-zero capacity
+        if term_dict_config.capacity().as_u64() > 0 {
+            let term_disk = disk_for(term_dict_config);
+            let term_dir = disk_base_path.join("term");
+            let term_cache = FoyerStorageCache::build(
+                term_dict_config.capacity().as_u64() as usize,
+                &term_dir,
+                term_disk,
+                crate::STORAGE_METRICS.term_dict_cache.cache_metrics.clone(),
+            )
+            .await?;
+            quickwit_cache.add_route(".term", Arc::new(term_cache));
+        }
+
+        // posting lists — only if configured with non-zero capacity
+        if posting_list_config.capacity().as_u64() > 0 {
+            let idx_disk = disk_for(posting_list_config);
+            let idx_dir = disk_base_path.join("idx");
+            let idx_cache = FoyerStorageCache::build(
+                posting_list_config.capacity().as_u64() as usize,
+                &idx_dir,
+                idx_disk,
+                crate::STORAGE_METRICS.posting_list_cache.cache_metrics.clone(),
+            )
+            .await?;
+            quickwit_cache.add_route(".idx", Arc::new(idx_cache));
+        }
+
+        Ok(quickwit_cache)
     }
 
     /// Empties cache.

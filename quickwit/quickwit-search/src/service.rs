@@ -501,23 +501,36 @@ impl SearcherContext {
         }
     }
 
-    /// Upgrades the partial request cache to a hybrid memory + disk cache.
+    /// Upgrades all caches to hybrid memory + disk using foyer.
     ///
-    /// Call this after construction if the searcher config specifies a disk cache path.
+    /// Call this after construction if the searcher config specifies a disk cache.
     /// This is separate from `new()` to keep construction synchronous for backward
     /// compatibility (many call sites, including tests, create SearcherContext synchronously).
-    pub async fn enable_hybrid_leaf_search_cache(
+    pub async fn enable_hybrid_caches(
         &mut self,
         disk_cache_path: &std::path::Path,
         disk_cache_capacity: bytesize::ByteSize,
     ) -> anyhow::Result<()> {
-        let hybrid_cache = LeafSearchCache::new_hybrid(
+        // upgrade partial request cache
+        let hybrid_leaf_cache = LeafSearchCache::new_hybrid(
             &self.searcher_config.partial_request_cache,
-            disk_cache_path,
+            &disk_cache_path.join("partial-request"),
             disk_cache_capacity,
         )
         .await?;
-        self.leaf_search_cache = hybrid_cache;
+        self.leaf_search_cache = hybrid_leaf_cache;
+
+        // upgrade storage cache (fast fields, term dicts, posting lists) to foyer
+        let storage_cache = QuickwitCache::with_foyer(
+            &self.searcher_config.fast_field_cache,
+            &self.searcher_config.term_dict_cache,
+            &self.searcher_config.posting_list_cache,
+            &disk_cache_path.join("storage"),
+            disk_cache_capacity,
+        )
+        .await?;
+        self.fast_fields_cache = Arc::new(storage_cache);
+
         Ok(())
     }
 
