@@ -56,6 +56,7 @@ pub enum LeafSearchCache {
     },
     Hybrid {
         cache: foyer::HybridCache<CacheKey, CachedValue>,
+        metrics: quickwit_storage::metrics::SingleCacheMetrics,
     },
 }
 
@@ -110,8 +111,14 @@ impl LeafSearchCache {
                 .build()
                 .await?;
 
+        let metrics = quickwit_storage::STORAGE_METRICS
+            .partial_request_cache
+            .cache_metrics
+            .clone();
+
         Ok(LeafSearchCache::Hybrid {
             cache: hybrid_cache,
+            metrics,
         })
     }
 
@@ -126,14 +133,21 @@ impl LeafSearchCache {
                 let encoded_result = content.get(&key)?;
                 LeafSearchResponse::decode(&*encoded_result).ok()
             }
-            LeafSearchCache::Hybrid { cache } => {
+            LeafSearchCache::Hybrid { cache, metrics } => {
                 let entry = cache.get(&key).await;
                 match entry {
                     Ok(Some(entry)) => {
-                        LeafSearchResponse::decode(entry.value().0.as_slice()).ok()
+                        metrics.hits_num_items.inc();
+                        let bytes = &entry.value().0;
+                        metrics.hits_num_bytes.inc_by(bytes.len() as u64);
+                        LeafSearchResponse::decode(bytes.as_slice()).ok()
                     }
-                    Ok(None) => None,
+                    Ok(None) => {
+                        metrics.misses_num_items.inc();
+                        None
+                    }
                     Err(err) => {
+                        metrics.misses_num_items.inc();
                         warn!(error = %err, "hybrid cache get failed, treating as miss");
                         None
                     }
@@ -156,7 +170,9 @@ impl LeafSearchCache {
             LeafSearchCache::MemoryOnly { content } => {
                 content.put(key, OwnedBytes::new(encoded_result));
             }
-            LeafSearchCache::Hybrid { cache } => {
+            LeafSearchCache::Hybrid { cache, metrics } => {
+                metrics.in_cache_num_bytes.add(encoded_result.len() as i64);
+                metrics.in_cache_count.inc();
                 cache.insert(key, CachedValue(encoded_result));
             }
         }
