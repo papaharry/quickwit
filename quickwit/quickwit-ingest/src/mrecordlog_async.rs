@@ -133,7 +133,31 @@ impl MultiRecordLogAsync {
         let span = info_span!("mrecordlog.truncate", queue, position);
         let queue = queue.to_string();
         self.run_operation(span, move |mrecordlog| {
-            mrecordlog.truncate(&queue, position)
+            mrecordlog.truncate(&queue, ..=position)
+        })
+        .await
+    }
+
+    /// Batches truncates of multiple queues into a single WAL write + fsync.
+    ///
+    /// Equivalent to calling [`Self::truncate`] for each `(queue, position)` pair, but collapses
+    /// N fsyncs into one. Missing queues and no-op truncates are silently skipped by mrecordlog.
+    /// On I/O failure, the WAL may have been partially advanced — callers should not assume the
+    /// in-memory `truncation_position` of every entry was applied.
+    #[instrument(
+        name = "mrecordlog.truncate_queues_async",
+        skip_all,
+        fields(num_queues)
+    )]
+    pub async fn truncate_queues(&mut self, truncations: Vec<(String, u64)>) -> io::Result<()> {
+        Span::current().record("num_queues", truncations.len());
+        let span = info_span!("mrecordlog.truncate_queues", num_queues = truncations.len());
+        self.run_operation(span, move |mrecordlog| {
+            mrecordlog.truncate_queues(
+                truncations
+                    .iter()
+                    .map(|(queue, position)| (queue.as_str(), ..=*position)),
+            )
         })
         .await
     }

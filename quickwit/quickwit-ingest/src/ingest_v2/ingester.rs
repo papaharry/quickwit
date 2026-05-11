@@ -1004,6 +1004,8 @@ impl Ingester {
         }
         let mut state_guard = self.state.lock_fully("truncate_shards_rpc").await?;
 
+        let mut truncations: Vec<(QueueId, Position)> =
+            Vec::with_capacity(truncate_shards_request.subrequests.len());
         for subrequest in truncate_shards_request.subrequests {
             let queue_id = subrequest.queue_id();
             let truncate_up_to_position_inclusive = subrequest.truncate_up_to_position_inclusive();
@@ -1011,10 +1013,13 @@ impl Ingester {
             if truncate_up_to_position_inclusive.is_eof() {
                 state_guard.delete_shard(&queue_id, "indexer RPC").await;
             } else {
-                state_guard
-                    .truncate_shard(&queue_id, truncate_up_to_position_inclusive, "indexer RPC")
-                    .await;
+                truncations.push((queue_id, truncate_up_to_position_inclusive));
             }
+        }
+        if !truncations.is_empty() {
+            state_guard
+                .truncate_shards(truncations, "indexer RPC")
+                .await;
         }
         let wal_usage = state_guard.mrecordlog.resource_usage();
         report_wal_usage(wal_usage);
@@ -1262,15 +1267,20 @@ impl EventSubscriber<ShardPositionsUpdate> for WeakIngesterState {
         let index_uid = shard_positions_update.source_uid.index_uid;
         let source_id = shard_positions_update.source_uid.source_id;
 
+        let mut truncations: Vec<(QueueId, Position)> =
+            Vec::with_capacity(shard_positions_update.updated_shard_positions.len());
         for (shard_id, shard_position) in shard_positions_update.updated_shard_positions {
             let queue_id = queue_id(&index_uid, &source_id, &shard_id);
             if shard_position.is_eof() {
                 state_guard.delete_shard(&queue_id, "indexer gossip").await;
             } else if !shard_position.is_beginning() {
-                state_guard
-                    .truncate_shard(&queue_id, shard_position, "indexer gossip")
-                    .await;
+                truncations.push((queue_id, shard_position));
             }
+        }
+        if !truncations.is_empty() {
+            state_guard
+                .truncate_shards(truncations, "indexer gossip")
+                .await;
         }
     }
 }

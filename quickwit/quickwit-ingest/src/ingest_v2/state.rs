@@ -21,7 +21,7 @@ use std::time::{Duration, Instant};
 
 use bytesize::ByteSize;
 use itertools::Itertools;
-use mrecordlog::error::{DeleteQueueError, TruncateError};
+use mrecordlog::error::DeleteQueueError;
 use quickwit_cluster::Cluster;
 use quickwit_common::pretty::PrettyDisplay;
 use quickwit_common::rate_limiter::{RateLimiter, RateLimiterSettings};
@@ -555,44 +555,69 @@ impl FullyLockedIngesterState<'_> {
         };
     }
 
-    /// Truncates the shard identified by `queue_id` up to `truncate_up_to_position_inclusive` only
-    /// if the current truncation position of the shard is smaller.
+    /// Truncates one or more shards up to their respective `truncate_up_to_position_inclusive`,
+    /// batching the underlying WAL writes into a single fsync.
+    ///
+    /// Per-entry, the behavior mirrors a single truncate: shards already past the requested
+    /// position are skipped, shards whose `Position` has no `u64` representation are skipped,
+    /// and shards present in our in-memory state but missing from the WAL are cleaned up as
+    /// dangling.
     #[instrument(
-        name = "ingester.truncate_shard",
+        name = "ingester.truncate_shards",
         skip_all,
-        fields(queue_id, truncate_up_to_position_inclusive, initiator)
+        fields(num_shards = truncations.len(), initiator)
     )]
-    pub async fn truncate_shard(
+    pub async fn truncate_shards(
         &mut self,
-        queue_id: &QueueId,
-        truncate_up_to_position_inclusive: Position,
+        truncations: Vec<(QueueId, Position)>,
         initiator: &'static str,
     ) {
-        if let Some(truncate_up_to_offset_inclusive) = truncate_up_to_position_inclusive.as_u64()
-            && let Some(shard) = self.inner.shards.get_mut(queue_id)
-            && shard.truncation_position_inclusive < truncate_up_to_position_inclusive
-        {
-            match self
-                .mrecordlog
-                .truncate(queue_id, truncate_up_to_offset_inclusive)
-                .await
-            {
-                Ok(_) => {
-                    info!(
-                        "truncated shard `{queue_id}` at {truncate_up_to_position_inclusive} \
-                         initiated via `{initiator}`"
-                    );
-                    shard.truncation_position_inclusive = truncate_up_to_position_inclusive;
-                }
-                Err(TruncateError::MissingQueue(_)) => {
-                    error!("failed to truncate shard `{queue_id}`: WAL queue not found");
-                    self.shards.remove(queue_id);
-                    info!("deleted dangling shard `{queue_id}`");
-                }
-                Err(TruncateError::IoError(io_error)) => {
-                    error!("failed to truncate shard `{queue_id}`: {io_error}");
-                }
+        let mut batch: Vec<(String, u64)> = Vec::with_capacity(truncations.len());
+        let mut to_update: Vec<(QueueId, Position)> = Vec::with_capacity(truncations.len());
+
+        for (queue_id, truncate_up_to_position_inclusive) in truncations {
+            let Some(truncate_up_to_offset_inclusive) = truncate_up_to_position_inclusive.as_u64()
+            else {
+                continue;
             };
+            let needs_truncate = match self.inner.shards.get(&queue_id) {
+                Some(shard) => {
+                    shard.truncation_position_inclusive < truncate_up_to_position_inclusive
+                }
+                None => false,
+            };
+            if !needs_truncate {
+                continue;
+            }
+            if !self.mrecordlog.queue_exists(&queue_id) {
+                error!("failed to truncate shard `{queue_id}`: WAL queue not found");
+                self.shards.remove(&queue_id);
+                info!("deleted dangling shard `{queue_id}`");
+                continue;
+            }
+            batch.push((queue_id.clone(), truncate_up_to_offset_inclusive));
+            to_update.push((queue_id, truncate_up_to_position_inclusive));
+        }
+
+        if batch.is_empty() {
+            return;
+        }
+
+        match self.mrecordlog.truncate_queues(batch).await {
+            Ok(()) => {
+                for (queue_id, truncate_up_to_position_inclusive) in to_update {
+                    if let Some(shard) = self.inner.shards.get_mut(&queue_id) {
+                        info!(
+                            "truncated shard `{queue_id}` at {truncate_up_to_position_inclusive} \
+                             initiated via `{initiator}`"
+                        );
+                        shard.truncation_position_inclusive = truncate_up_to_position_inclusive;
+                    }
+                }
+            }
+            Err(io_error) => {
+                error!("failed to truncate shards: {io_error}");
+            }
         }
     }
 
@@ -606,15 +631,15 @@ impl FullyLockedIngesterState<'_> {
                     .await;
             }
         }
+        let mut truncations: Vec<(QueueId, Position)> = Vec::new();
         for shard_id_positions in &advise_reset_shards_response.shards_to_truncate {
             for (queue_id, publish_position) in shard_id_positions.queue_id_positions() {
-                self.truncate_shard(
-                    &queue_id,
-                    publish_position,
-                    "control-plane-reset-shards-rpc",
-                )
-                .await;
+                truncations.push((queue_id, publish_position));
             }
+        }
+        if !truncations.is_empty() {
+            self.truncate_shards(truncations, "control-plane-reset-shards-rpc")
+                .await;
         }
     }
 }
