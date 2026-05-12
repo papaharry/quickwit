@@ -837,7 +837,9 @@ where
 {
     async fn ingest(&self, request: IngestRequest) -> crate::Result<IngestResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .ingest(tonic_request)
@@ -850,7 +852,9 @@ where
     }
     async fn fetch(&self, request: FetchRequest) -> crate::Result<FetchResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .fetch(tonic_request)
@@ -863,7 +867,9 @@ where
     }
     async fn tail(&self, request: TailRequest) -> crate::Result<FetchResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .tail(tonic_request)
@@ -895,7 +901,7 @@ impl ingest_service_grpc_server::IngestServiceGrpc for IngestServiceGrpcServerAd
         &self,
         tonic_request: tonic::Request<IngestRequest>,
     ) -> Result<tonic::Response<IngestResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -918,7 +924,7 @@ impl ingest_service_grpc_server::IngestServiceGrpc for IngestServiceGrpcServerAd
         &self,
         tonic_request: tonic::Request<FetchRequest>,
     ) -> Result<tonic::Response<FetchResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -941,7 +947,7 @@ impl ingest_service_grpc_server::IngestServiceGrpc for IngestServiceGrpcServerAd
         &self,
         tonic_request: tonic::Request<TailRequest>,
     ) -> Result<tonic::Response<FetchResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

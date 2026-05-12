@@ -67,10 +67,7 @@ impl MultiRecordLogAsync {
         })
     }
 
-    /// Runs `operation` on a blocking task, instrumenting it with `inner_span`
-    /// so the span's duration covers only the synchronous mrecordlog work.
-    /// The caller's outer `_async` span continues to measure end-to-end time;
-    /// the difference is the `spawn_blocking` scheduling overhead.
+    /// Runs `operation` on a blocking task instrumented with `inner_span`.
     async fn run_operation<F, T>(&mut self, inner_span: Span, operation: F) -> T
     where
         F: FnOnce(&mut MultiRecordLog) -> T + Send + 'static,

@@ -19,7 +19,7 @@ use std::time::Duration;
 
 use bytesize::ByteSize;
 use http::Uri;
-use quickwit_common::tracing::SpanContextInterceptor;
+use quickwit_common::tracing_utils::SpanContextInterceptor;
 use quickwit_proto::search::{GetKvRequest, PutKvRequest, ReportSplitsRequest};
 use quickwit_proto::tonic;
 use quickwit_proto::tonic::Request;

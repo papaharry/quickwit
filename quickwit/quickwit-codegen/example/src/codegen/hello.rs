@@ -746,7 +746,9 @@ where
 {
     async fn hello(&self, request: HelloRequest) -> crate::HelloResult<HelloResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .hello(tonic_request)
@@ -762,7 +764,9 @@ where
         request: GoodbyeRequest,
     ) -> crate::HelloResult<GoodbyeResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .goodbye(tonic_request)
@@ -778,7 +782,9 @@ where
         request: quickwit_common::ServiceStream<PingRequest>,
     ) -> crate::HelloResult<HelloStream<PingResponse>> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .ping(tonic_request)
@@ -833,7 +839,7 @@ impl hello_grpc_server::HelloGrpc for HelloGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<HelloRequest>,
     ) -> Result<tonic::Response<HelloResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -856,7 +862,7 @@ impl hello_grpc_server::HelloGrpc for HelloGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<GoodbyeRequest>,
     ) -> Result<tonic::Response<GoodbyeResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -880,7 +886,7 @@ impl hello_grpc_server::HelloGrpc for HelloGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<tonic::Streaming<PingRequest>>,
     ) -> Result<tonic::Response<Self::PingStream>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let streaming: tonic::Streaming<_> = tonic_request.into_inner();

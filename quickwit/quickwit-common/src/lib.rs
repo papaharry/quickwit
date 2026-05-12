@@ -46,7 +46,7 @@ pub mod temp_dir;
 pub mod test_utils;
 pub mod thread_pool;
 pub mod tower;
-pub mod tracing;
+pub mod tracing_utils;
 pub mod type_map;
 pub mod uri;
 
@@ -61,7 +61,6 @@ use std::future::Future;
 use std::ops::{Range, RangeInclusive};
 use std::str::FromStr;
 
-use ::tracing::{error, info};
 pub use coolid::new_coolid;
 pub use cpus::num_cpus;
 pub use kill_switch::KillSwitch;
@@ -69,6 +68,7 @@ pub use path_hasher::PathHasher;
 pub use progress::{Progress, ProtectedZoneGuard};
 pub use socket_addr_legacy_hash::SocketAddrLegacyHash;
 pub use stream_utils::{BoxStream, ServiceStream};
+use tracing::{error, info};
 
 /// Returns true at compile time. This function is mostly used with serde to initialize boolean
 /// fields to true.

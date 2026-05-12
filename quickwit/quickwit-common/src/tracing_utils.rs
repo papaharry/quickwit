@@ -25,6 +25,7 @@ use opentelemetry::{Context, global};
 use tonic::Status;
 use tonic::metadata::{KeyAndValueRef, MetadataKey, MetadataMap, MetadataValue};
 use tonic::service::Interceptor;
+use tracing::Span;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 struct MetadataInjector<'a>(&'a mut MetadataMap);
@@ -64,7 +65,7 @@ impl Extractor for MetadataExtractor<'_> {
 ///
 /// No-op when no global text-map propagator is installed.
 pub fn inject_current_context(metadata: &mut MetadataMap) {
-    let context = ::tracing::Span::current().context();
+    let context = Span::current().context();
     let mut injector = MetadataInjector(metadata);
     global::get_text_map_propagator(|propagator| {
         propagator.inject_context(&context, &mut injector);
@@ -86,7 +87,7 @@ pub fn extract_context(metadata: &MetadataMap) -> Context {
 /// caller's trace.
 pub fn set_current_span_parent_from_metadata(metadata: &MetadataMap) {
     let parent_context = extract_context(metadata);
-    let _ = ::tracing::Span::current().set_parent(parent_context);
+    let _ = Span::current().set_parent(parent_context);
 }
 
 /// Tonic interceptor that injects the active span's W3C trace context into
@@ -104,8 +105,6 @@ impl Interceptor for SpanContextInterceptor {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Once;
-
     use opentelemetry::propagation::TextMapPropagator;
     use opentelemetry::trace::{
         SpanContext, SpanId, TraceContextExt, TraceFlags, TraceId, TraceState,
@@ -114,15 +113,10 @@ mod tests {
 
     use super::*;
 
-    /// Installs a `TraceContextPropagator` once for the whole test binary.
-    /// `set_text_map_propagator` is process-global; calling it from each
-    /// test would race, so we gate it behind `Once`.
-    fn install_propagator() {
-        static INIT: Once = Once::new();
-        INIT.call_once(|| {
-            global::set_text_map_propagator(TraceContextPropagator::new());
-        });
-    }
+    // Tests use a locally-constructed `TraceContextPropagator` rather than
+    // installing one as the process-global default. `set_text_map_propagator`
+    // is global and racy across parallel tests; what we actually own and need
+    // to verify is the `MetadataInjector`/`MetadataExtractor` pair.
 
     fn known_span_context() -> SpanContext {
         SpanContext::new(
@@ -136,25 +130,22 @@ mod tests {
 
     #[test]
     fn inject_then_extract_round_trip_preserves_span_context() {
-        install_propagator();
-
         let span_context = known_span_context();
         let context = Context::new().with_remote_span_context(span_context.clone());
 
-        // Use the propagator directly to inject into metadata via our
-        // `MetadataInjector`. We don't go through `inject_current_context`
-        // here because doing so would require a tracing subscriber with the
-        // OpenTelemetry layer; the round-trip we care about lives in the
-        // injector/extractor pair.
-        let mut metadata = MetadataMap::new();
         let propagator = TraceContextPropagator::new();
+        let mut metadata = MetadataMap::new();
         propagator.inject_context(&context, &mut MetadataInjector(&mut metadata));
 
         // `traceparent` is the W3C header — proves the injector wrote
         // through the metadata map.
         assert!(metadata.contains_key("traceparent"));
 
-        let extracted_span_context = extract_context(&metadata).span().span_context().clone();
+        let extracted_span_context = propagator
+            .extract(&MetadataExtractor(&metadata))
+            .span()
+            .span_context()
+            .clone();
         assert_eq!(extracted_span_context.trace_id(), span_context.trace_id());
         assert_eq!(extracted_span_context.span_id(), span_context.span_id());
         assert_eq!(
@@ -165,18 +156,20 @@ mod tests {
 
     #[test]
     fn extract_returns_invalid_span_context_when_no_traceparent() {
-        install_propagator();
-
+        let propagator = TraceContextPropagator::new();
         let metadata = MetadataMap::new();
-        let extracted_span_context = extract_context(&metadata).span().span_context().clone();
+        let extracted_span_context = propagator
+            .extract(&MetadataExtractor(&metadata))
+            .span()
+            .span_context()
+            .clone();
         // No traceparent header → propagator yields an invalid span context.
         assert!(!extracted_span_context.is_valid());
     }
 
     #[test]
     fn extract_ignores_binary_metadata_keys() {
-        install_propagator();
-
+        let propagator = TraceContextPropagator::new();
         let mut metadata = MetadataMap::new();
         metadata.insert_bin(
             "x-bin-bin",
@@ -184,7 +177,11 @@ mod tests {
         );
         // Binary keys are filtered out of `keys()`, so the propagator sees an
         // empty key set and produces an invalid span context — not a panic.
-        let extracted_span_context = extract_context(&metadata).span().span_context().clone();
+        let extracted_span_context = propagator
+            .extract(&MetadataExtractor(&metadata))
+            .span()
+            .span_context()
+            .clone();
         assert!(!extracted_span_context.is_valid());
     }
 }

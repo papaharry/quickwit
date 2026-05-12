@@ -582,7 +582,9 @@ where
         request: IngestRequestV2,
     ) -> crate::ingest::IngestV2Result<IngestResponseV2> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .ingest(tonic_request)
@@ -615,7 +617,7 @@ for IngestRouterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<IngestRequestV2>,
     ) -> Result<tonic::Response<IngestResponseV2>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

@@ -467,7 +467,9 @@ where
         request: GetDebugInfoRequest,
     ) -> crate::developer::DeveloperResult<GetDebugInfoResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .get_debug_info(tonic_request)
@@ -500,7 +502,7 @@ for DeveloperServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<GetDebugInfoRequest>,
     ) -> Result<tonic::Response<GetDebugInfoResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

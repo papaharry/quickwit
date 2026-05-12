@@ -479,7 +479,9 @@ where
         request: ApplyIndexingPlanRequest,
     ) -> crate::indexing::IndexingResult<ApplyIndexingPlanResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .apply_indexing_plan(tonic_request)
@@ -512,7 +514,7 @@ for IndexingServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ApplyIndexingPlanRequest>,
     ) -> Result<tonic::Response<ApplyIndexingPlanResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

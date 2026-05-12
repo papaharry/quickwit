@@ -534,7 +534,9 @@ where
         request: FetchClusterStateRequest,
     ) -> crate::cluster::ClusterResult<FetchClusterStateResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .fetch_cluster_state(tonic_request)
@@ -567,7 +569,7 @@ for ClusterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<FetchClusterStateRequest>,
     ) -> Result<tonic::Response<FetchClusterStateResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

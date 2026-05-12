@@ -1791,7 +1791,9 @@ where
         super::metastore::CreateIndexResponse,
     > {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .create_index(tonic_request)
@@ -1809,7 +1811,9 @@ where
         super::metastore::IndexMetadataResponse,
     > {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .update_index(tonic_request)
@@ -1825,7 +1829,9 @@ where
         request: super::metastore::DeleteIndexRequest,
     ) -> crate::control_plane::ControlPlaneResult<super::metastore::EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_index(tonic_request)
@@ -1841,7 +1847,9 @@ where
         request: super::metastore::AddSourceRequest,
     ) -> crate::control_plane::ControlPlaneResult<super::metastore::EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .add_source(tonic_request)
@@ -1857,7 +1865,9 @@ where
         request: super::metastore::UpdateSourceRequest,
     ) -> crate::control_plane::ControlPlaneResult<super::metastore::EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .update_source(tonic_request)
@@ -1873,7 +1883,9 @@ where
         request: super::metastore::ToggleSourceRequest,
     ) -> crate::control_plane::ControlPlaneResult<super::metastore::EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .toggle_source(tonic_request)
@@ -1889,7 +1901,9 @@ where
         request: super::metastore::DeleteSourceRequest,
     ) -> crate::control_plane::ControlPlaneResult<super::metastore::EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_source(tonic_request)
@@ -1905,7 +1919,9 @@ where
         request: GetOrCreateOpenShardsRequest,
     ) -> crate::control_plane::ControlPlaneResult<GetOrCreateOpenShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .get_or_create_open_shards(tonic_request)
@@ -1921,7 +1937,9 @@ where
         request: AdviseResetShardsRequest,
     ) -> crate::control_plane::ControlPlaneResult<AdviseResetShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .advise_reset_shards(tonic_request)
@@ -1937,7 +1955,9 @@ where
         request: super::metastore::PruneShardsRequest,
     ) -> crate::control_plane::ControlPlaneResult<super::metastore::EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .prune_shards(tonic_request)
@@ -1970,7 +1990,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::CreateIndexRequest>,
     ) -> Result<tonic::Response<super::metastore::CreateIndexResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -1996,7 +2016,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         tonic::Response<super::metastore::IndexMetadataResponse>,
         tonic::Status,
     > {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2019,7 +2039,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::DeleteIndexRequest>,
     ) -> Result<tonic::Response<super::metastore::EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2042,7 +2062,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::AddSourceRequest>,
     ) -> Result<tonic::Response<super::metastore::EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2065,7 +2085,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::UpdateSourceRequest>,
     ) -> Result<tonic::Response<super::metastore::EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2088,7 +2108,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::ToggleSourceRequest>,
     ) -> Result<tonic::Response<super::metastore::EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2111,7 +2131,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::DeleteSourceRequest>,
     ) -> Result<tonic::Response<super::metastore::EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2134,7 +2154,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<GetOrCreateOpenShardsRequest>,
     ) -> Result<tonic::Response<GetOrCreateOpenShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2157,7 +2177,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<AdviseResetShardsRequest>,
     ) -> Result<tonic::Response<AdviseResetShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2180,7 +2200,7 @@ for ControlPlaneServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<super::metastore::PruneShardsRequest>,
     ) -> Result<tonic::Response<super::metastore::EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

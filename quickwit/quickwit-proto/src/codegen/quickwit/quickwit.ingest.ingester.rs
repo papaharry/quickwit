@@ -2047,7 +2047,9 @@ where
         request: PersistRequest,
     ) -> crate::ingest::IngestV2Result<PersistResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .persist(tonic_request)
@@ -2063,7 +2065,9 @@ where
         request: quickwit_common::ServiceStream<SynReplicationMessage>,
     ) -> crate::ingest::IngestV2Result<IngesterServiceStream<AckReplicationMessage>> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .open_replication_stream(tonic_request)
@@ -2087,7 +2091,9 @@ where
         request: OpenFetchStreamRequest,
     ) -> crate::ingest::IngestV2Result<IngesterServiceStream<FetchMessage>> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .open_fetch_stream(tonic_request)
@@ -2111,7 +2117,9 @@ where
         request: OpenObservationStreamRequest,
     ) -> crate::ingest::IngestV2Result<IngesterServiceStream<ObservationMessage>> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .open_observation_stream(tonic_request)
@@ -2135,7 +2143,9 @@ where
         request: InitShardsRequest,
     ) -> crate::ingest::IngestV2Result<InitShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .init_shards(tonic_request)
@@ -2151,7 +2161,9 @@ where
         request: RetainShardsRequest,
     ) -> crate::ingest::IngestV2Result<RetainShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .retain_shards(tonic_request)
@@ -2167,7 +2179,9 @@ where
         request: TruncateShardsRequest,
     ) -> crate::ingest::IngestV2Result<TruncateShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .truncate_shards(tonic_request)
@@ -2183,7 +2197,9 @@ where
         request: CloseShardsRequest,
     ) -> crate::ingest::IngestV2Result<CloseShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .close_shards(tonic_request)
@@ -2199,7 +2215,9 @@ where
         request: DecommissionRequest,
     ) -> crate::ingest::IngestV2Result<DecommissionResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .decommission(tonic_request)
@@ -2232,7 +2250,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<PersistRequest>,
     ) -> Result<tonic::Response<PersistResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2261,7 +2279,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<tonic::Streaming<SynReplicationMessage>>,
     ) -> Result<tonic::Response<Self::OpenReplicationStreamStream>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let streaming: tonic::Streaming<_> = tonic_request.into_inner();
@@ -2290,7 +2308,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<OpenFetchStreamRequest>,
     ) -> Result<tonic::Response<Self::OpenFetchStreamStream>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2318,7 +2336,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<OpenObservationStreamRequest>,
     ) -> Result<tonic::Response<Self::OpenObservationStreamStream>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2343,7 +2361,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<InitShardsRequest>,
     ) -> Result<tonic::Response<InitShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2366,7 +2384,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<RetainShardsRequest>,
     ) -> Result<tonic::Response<RetainShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2389,7 +2407,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<TruncateShardsRequest>,
     ) -> Result<tonic::Response<TruncateShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2412,7 +2430,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<CloseShardsRequest>,
     ) -> Result<tonic::Response<CloseShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -2435,7 +2453,7 @@ for IngesterServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DecommissionRequest>,
     ) -> Result<tonic::Response<DecommissionResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();

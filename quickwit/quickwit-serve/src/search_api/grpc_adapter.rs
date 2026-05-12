@@ -15,7 +15,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use quickwit_common::tracing::set_current_span_parent_from_metadata;
+use quickwit_common::tracing_utils::set_current_span_parent_from_metadata;
 use quickwit_proto::error::convert_to_grpc_result;
 use quickwit_proto::search::{
     GetKvRequest, GetKvResponse, LeafListFieldsRequest, ListFieldsRequest, ListFieldsResponse,

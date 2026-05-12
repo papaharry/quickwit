@@ -1326,7 +1326,7 @@ fn generate_grpc_client_adapter_methods(context: &CodegenContext) -> TokenStream
         let method = quote! {
             async fn #method_name(&self, request: #request_type) -> #result_type<#response_type> {
                 let mut tonic_request = tonic::Request::new(request);
-                quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+                quickwit_common::tracing_utils::inject_current_context(tonic_request.metadata_mut());
                 self.inner
                     .clone()
                     .#method_name(tonic_request)
@@ -1430,7 +1430,7 @@ fn generate_grpc_server_adapter_methods(context: &CodegenContext) -> TokenStream
             #associated_type
 
             async fn #method_name(&self, tonic_request: tonic::Request<#request_type>) -> Result<tonic::Response<#response_type>, tonic::Status> {
-                let parent_context = quickwit_common::tracing::extract_context(tonic_request.metadata());
+                let parent_context = quickwit_common::tracing_utils::extract_context(tonic_request.metadata());
                 #inner_binding
                 let span = #span_macro;
                 let _ = <tracing::Span as tracing_opentelemetry::OpenTelemetrySpanExt>::set_parent(&span, parent_context);

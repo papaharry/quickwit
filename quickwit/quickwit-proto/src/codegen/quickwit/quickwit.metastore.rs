@@ -6759,7 +6759,9 @@ where
         request: CreateIndexRequest,
     ) -> crate::metastore::MetastoreResult<CreateIndexResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .create_index(tonic_request)
@@ -6775,7 +6777,9 @@ where
         request: UpdateIndexRequest,
     ) -> crate::metastore::MetastoreResult<IndexMetadataResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .update_index(tonic_request)
@@ -6791,7 +6795,9 @@ where
         request: IndexMetadataRequest,
     ) -> crate::metastore::MetastoreResult<IndexMetadataResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .index_metadata(tonic_request)
@@ -6807,7 +6813,9 @@ where
         request: IndexesMetadataRequest,
     ) -> crate::metastore::MetastoreResult<IndexesMetadataResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .indexes_metadata(tonic_request)
@@ -6823,7 +6831,9 @@ where
         request: ListIndexesMetadataRequest,
     ) -> crate::metastore::MetastoreResult<ListIndexesMetadataResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_indexes_metadata(tonic_request)
@@ -6839,7 +6849,9 @@ where
         request: DeleteIndexRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_index(tonic_request)
@@ -6855,7 +6867,9 @@ where
         request: ListIndexStatsRequest,
     ) -> crate::metastore::MetastoreResult<ListIndexStatsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_index_stats(tonic_request)
@@ -6871,7 +6885,9 @@ where
         request: ListSplitsRequest,
     ) -> crate::metastore::MetastoreResult<MetastoreServiceStream<ListSplitsResponse>> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_splits(tonic_request)
@@ -6895,7 +6911,9 @@ where
         request: StageSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .stage_splits(tonic_request)
@@ -6911,7 +6929,9 @@ where
         request: PublishSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .publish_splits(tonic_request)
@@ -6927,7 +6947,9 @@ where
         request: MarkSplitsForDeletionRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .mark_splits_for_deletion(tonic_request)
@@ -6943,7 +6965,9 @@ where
         request: DeleteSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_splits(tonic_request)
@@ -6959,7 +6983,9 @@ where
         request: AddSourceRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .add_source(tonic_request)
@@ -6975,7 +7001,9 @@ where
         request: UpdateSourceRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .update_source(tonic_request)
@@ -6991,7 +7019,9 @@ where
         request: ToggleSourceRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .toggle_source(tonic_request)
@@ -7007,7 +7037,9 @@ where
         request: DeleteSourceRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_source(tonic_request)
@@ -7023,7 +7055,9 @@ where
         request: ResetSourceCheckpointRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .reset_source_checkpoint(tonic_request)
@@ -7039,7 +7073,9 @@ where
         request: LastDeleteOpstampRequest,
     ) -> crate::metastore::MetastoreResult<LastDeleteOpstampResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .last_delete_opstamp(tonic_request)
@@ -7055,7 +7091,9 @@ where
         request: DeleteQuery,
     ) -> crate::metastore::MetastoreResult<DeleteTask> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .create_delete_task(tonic_request)
@@ -7071,7 +7109,9 @@ where
         request: UpdateSplitsDeleteOpstampRequest,
     ) -> crate::metastore::MetastoreResult<UpdateSplitsDeleteOpstampResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .update_splits_delete_opstamp(tonic_request)
@@ -7087,7 +7127,9 @@ where
         request: ListDeleteTasksRequest,
     ) -> crate::metastore::MetastoreResult<ListDeleteTasksResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_delete_tasks(tonic_request)
@@ -7103,7 +7145,9 @@ where
         request: ListStaleSplitsRequest,
     ) -> crate::metastore::MetastoreResult<ListSplitsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_stale_splits(tonic_request)
@@ -7119,7 +7163,9 @@ where
         request: OpenShardsRequest,
     ) -> crate::metastore::MetastoreResult<OpenShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .open_shards(tonic_request)
@@ -7135,7 +7181,9 @@ where
         request: AcquireShardsRequest,
     ) -> crate::metastore::MetastoreResult<AcquireShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .acquire_shards(tonic_request)
@@ -7151,7 +7199,9 @@ where
         request: DeleteShardsRequest,
     ) -> crate::metastore::MetastoreResult<DeleteShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_shards(tonic_request)
@@ -7167,7 +7217,9 @@ where
         request: PruneShardsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .prune_shards(tonic_request)
@@ -7183,7 +7235,9 @@ where
         request: ListShardsRequest,
     ) -> crate::metastore::MetastoreResult<ListShardsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_shards(tonic_request)
@@ -7199,7 +7253,9 @@ where
         request: CreateIndexTemplateRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .create_index_template(tonic_request)
@@ -7215,7 +7271,9 @@ where
         request: GetIndexTemplateRequest,
     ) -> crate::metastore::MetastoreResult<GetIndexTemplateResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .get_index_template(tonic_request)
@@ -7231,7 +7289,9 @@ where
         request: FindIndexTemplateMatchesRequest,
     ) -> crate::metastore::MetastoreResult<FindIndexTemplateMatchesResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .find_index_template_matches(tonic_request)
@@ -7247,7 +7307,9 @@ where
         request: ListIndexTemplatesRequest,
     ) -> crate::metastore::MetastoreResult<ListIndexTemplatesResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_index_templates(tonic_request)
@@ -7263,7 +7325,9 @@ where
         request: DeleteIndexTemplatesRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_index_templates(tonic_request)
@@ -7279,7 +7343,9 @@ where
         request: GetClusterIdentityRequest,
     ) -> crate::metastore::MetastoreResult<GetClusterIdentityResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .get_cluster_identity(tonic_request)
@@ -7295,7 +7361,9 @@ where
         request: StageMetricsSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .stage_metrics_splits(tonic_request)
@@ -7311,7 +7379,9 @@ where
         request: PublishMetricsSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .publish_metrics_splits(tonic_request)
@@ -7327,7 +7397,9 @@ where
         request: ListMetricsSplitsRequest,
     ) -> crate::metastore::MetastoreResult<ListMetricsSplitsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_metrics_splits(tonic_request)
@@ -7343,7 +7415,9 @@ where
         request: MarkMetricsSplitsForDeletionRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .mark_metrics_splits_for_deletion(tonic_request)
@@ -7359,7 +7433,9 @@ where
         request: DeleteMetricsSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_metrics_splits(tonic_request)
@@ -7375,7 +7451,9 @@ where
         request: StageSketchSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .stage_sketch_splits(tonic_request)
@@ -7391,7 +7469,9 @@ where
         request: PublishSketchSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .publish_sketch_splits(tonic_request)
@@ -7407,7 +7487,9 @@ where
         request: ListSketchSplitsRequest,
     ) -> crate::metastore::MetastoreResult<ListSketchSplitsResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .list_sketch_splits(tonic_request)
@@ -7423,7 +7505,9 @@ where
         request: MarkSketchSplitsForDeletionRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .mark_sketch_splits_for_deletion(tonic_request)
@@ -7439,7 +7523,9 @@ where
         request: DeleteSketchSplitsRequest,
     ) -> crate::metastore::MetastoreResult<EmptyResponse> {
         let mut tonic_request = tonic::Request::new(request);
-        quickwit_common::tracing::inject_current_context(tonic_request.metadata_mut());
+        quickwit_common::tracing_utils::inject_current_context(
+            tonic_request.metadata_mut(),
+        );
         self.inner
             .clone()
             .delete_sketch_splits(tonic_request)
@@ -7487,7 +7573,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<CreateIndexRequest>,
     ) -> Result<tonic::Response<CreateIndexResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7510,7 +7596,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<UpdateIndexRequest>,
     ) -> Result<tonic::Response<IndexMetadataResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7533,7 +7619,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<IndexMetadataRequest>,
     ) -> Result<tonic::Response<IndexMetadataResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7556,7 +7642,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<IndexesMetadataRequest>,
     ) -> Result<tonic::Response<IndexesMetadataResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7579,7 +7665,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListIndexesMetadataRequest>,
     ) -> Result<tonic::Response<ListIndexesMetadataResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7602,7 +7688,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteIndexRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7625,7 +7711,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListIndexStatsRequest>,
     ) -> Result<tonic::Response<ListIndexStatsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7651,7 +7737,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListSplitsRequest>,
     ) -> Result<tonic::Response<Self::ListSplitsStream>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7676,7 +7762,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<StageSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7699,7 +7785,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<PublishSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7722,7 +7808,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<MarkSplitsForDeletionRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7745,7 +7831,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7768,7 +7854,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<AddSourceRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7791,7 +7877,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<UpdateSourceRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7814,7 +7900,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ToggleSourceRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7837,7 +7923,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteSourceRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7860,7 +7946,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ResetSourceCheckpointRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7883,7 +7969,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<LastDeleteOpstampRequest>,
     ) -> Result<tonic::Response<LastDeleteOpstampResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7906,7 +7992,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteQuery>,
     ) -> Result<tonic::Response<DeleteTask>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7929,7 +8015,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<UpdateSplitsDeleteOpstampRequest>,
     ) -> Result<tonic::Response<UpdateSplitsDeleteOpstampResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7952,7 +8038,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListDeleteTasksRequest>,
     ) -> Result<tonic::Response<ListDeleteTasksResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7975,7 +8061,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListStaleSplitsRequest>,
     ) -> Result<tonic::Response<ListSplitsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -7998,7 +8084,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<OpenShardsRequest>,
     ) -> Result<tonic::Response<OpenShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8021,7 +8107,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<AcquireShardsRequest>,
     ) -> Result<tonic::Response<AcquireShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8044,7 +8130,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteShardsRequest>,
     ) -> Result<tonic::Response<DeleteShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8067,7 +8153,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<PruneShardsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8090,7 +8176,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListShardsRequest>,
     ) -> Result<tonic::Response<ListShardsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8113,7 +8199,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<CreateIndexTemplateRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8136,7 +8222,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<GetIndexTemplateRequest>,
     ) -> Result<tonic::Response<GetIndexTemplateResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8159,7 +8245,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<FindIndexTemplateMatchesRequest>,
     ) -> Result<tonic::Response<FindIndexTemplateMatchesResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8182,7 +8268,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListIndexTemplatesRequest>,
     ) -> Result<tonic::Response<ListIndexTemplatesResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8205,7 +8291,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteIndexTemplatesRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8228,7 +8314,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<GetClusterIdentityRequest>,
     ) -> Result<tonic::Response<GetClusterIdentityResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8251,7 +8337,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<StageMetricsSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8274,7 +8360,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<PublishMetricsSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8297,7 +8383,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListMetricsSplitsRequest>,
     ) -> Result<tonic::Response<ListMetricsSplitsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8320,7 +8406,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<MarkMetricsSplitsForDeletionRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8343,7 +8429,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteMetricsSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8366,7 +8452,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<StageSketchSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8389,7 +8475,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<PublishSketchSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8412,7 +8498,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<ListSketchSplitsRequest>,
     ) -> Result<tonic::Response<ListSketchSplitsResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8435,7 +8521,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<MarkSketchSplitsForDeletionRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
@@ -8458,7 +8544,7 @@ for MetastoreServiceGrpcServerAdapter {
         &self,
         tonic_request: tonic::Request<DeleteSketchSplitsRequest>,
     ) -> Result<tonic::Response<EmptyResponse>, tonic::Status> {
-        let parent_context = quickwit_common::tracing::extract_context(
+        let parent_context = quickwit_common::tracing_utils::extract_context(
             tonic_request.metadata(),
         );
         let request = tonic_request.into_inner();
